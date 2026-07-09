@@ -112,7 +112,8 @@ async function renderWebGpuPreview(): Promise<void> {
     }
     deviceHandle = device;
 
-    const context = canvas.getContext("webgpu");
+    
+const context = canvas.getContext("webgpu") as GPUCanvasContext | null;
     if (!context) {
       statusMessage.value = "WebGPU 캔버스 컨텍스트를 열지 못했습니다.";
       return;

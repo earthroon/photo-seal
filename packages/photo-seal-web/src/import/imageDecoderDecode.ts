@@ -14,7 +14,9 @@ export async function decodeWithImageDecoder(args: {
   width: number;
   height: number;
 }> {
-  const maybeDecoder = (globalThis as { ImageDecoder?: MinimalImageDecoderConstructor }).ImageDecoder;
+  const maybeDecoder = (globalThis as unknown as {
+  ImageDecoder?: MinimalImageDecoderConstructor;
+}).ImageDecoder;
   if (!maybeDecoder) {
     throw new PhotoSealImageImportError(
       "IMAGE_BITMAP_UNAVAILABLE",
