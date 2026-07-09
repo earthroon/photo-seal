@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+console.log("PASS_TDT_JPEG_WASM_01_RUST_CRATE_SKELETON_RGBA_INPUT_CONTRACT");

@@ -1,0 +1,21 @@
+{
+  "name": "tdt-photoseal",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter photo-seal-web dev",
+    "build": "pnpm --filter photo-seal-web build",
+    "preview": "pnpm --filter photo-seal-web preview",
+    "typecheck": "pnpm --filter photo-seal-web typecheck",
+    "e2e:photoseal07r1": "node scripts/smoke-tdt-photoseal-07-r1-playwright-runtime-e2e.mjs",
+    "smoke:photoseal07r1:static": "node scripts/smoke-tdt-photoseal-07-r1-playwright-runtime-static.mjs",
+    "smoke:photoseal08": "node scripts/smoke-tdt-photoseal-08-real-image-import-browser-decode-srgb.mjs",
+    "smoke:photoseal09r1:static": "node scripts/smoke-tdt-photoseal-09-r1-browser-jpeg-save-static.mjs",
+    "smoke:photoseal09r1:runtime": "node scripts/smoke-tdt-photoseal-09-r1-browser-jpeg-save-runtime.mjs",
+    "smoke:photoseal11": "node scripts/smoke-tdt-photoseal-11-export-preset-profiles.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "latest"
+  }
+}
