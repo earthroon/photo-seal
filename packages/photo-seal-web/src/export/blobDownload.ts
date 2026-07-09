@@ -3,8 +3,11 @@ import { PhotoSealSaveError } from "./saveError";
 export type PhotoSealBlobDownloadResult = {
   objectUrlCreated: boolean;
   objectUrlRevoked: boolean;
+  objectUrlRevokeScheduled: boolean;
   anchorDownloadUsed: boolean;
 };
+
+const OBJECT_URL_REVOKE_DELAY_MS = 60_000;
 
 function byteLengthOf(input: Uint8Array | ArrayBuffer): number {
   return input.byteLength;
@@ -59,36 +62,54 @@ export function downloadBlobWithAnchor(args: {
     throw new PhotoSealSaveError("DOWNLOAD_TRIGGER_FAILED", "Anchor download is unavailable in this runtime.");
   }
 
-  let objectUrl: string | undefined;
+  if (typeof window === "undefined" || typeof window.setTimeout !== "function") {
+    throw new PhotoSealSaveError("DOWNLOAD_TRIGGER_FAILED", "Timer API is unavailable in this runtime.");
+  }
+
   let objectUrlCreated = false;
-  let objectUrlRevoked = false;
   let anchorDownloadUsed = false;
+  let objectUrlRevokeScheduled = false;
 
   try {
-    objectUrl = URL.createObjectURL(args.blob);
+    const objectUrl = URL.createObjectURL(args.blob);
     objectUrlCreated = true;
 
     const anchor = document.createElement("a");
     anchor.href = objectUrl;
     anchor.download = args.fileName;
     anchor.rel = "noopener";
-    anchor.style.display = "none";
+
+    // Do not use display:none here.
+    // Some mobile browsers are less reliable when clicking a hidden download anchor.
+    anchor.style.position = "fixed";
+    anchor.style.left = "-9999px";
+    anchor.style.top = "0";
+    anchor.style.width = "1px";
+    anchor.style.height = "1px";
+    anchor.style.opacity = "0";
+    anchor.style.pointerEvents = "none";
 
     document.body.appendChild(anchor);
     anchor.click();
     anchorDownloadUsed = true;
-    anchor.remove();
+
+    window.setTimeout(() => {
+      anchor.remove();
+      URL.revokeObjectURL(objectUrl);
+    }, OBJECT_URL_REVOKE_DELAY_MS);
+
+    objectUrlRevokeScheduled = true;
   } catch (error) {
     throw new PhotoSealSaveError(
       "DOWNLOAD_TRIGGER_FAILED",
       error instanceof Error ? error.message : "Download trigger failed.",
     );
-  } finally {
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
-      objectUrlRevoked = true;
-    }
   }
 
-  return { objectUrlCreated, objectUrlRevoked, anchorDownloadUsed };
+  return {
+    objectUrlCreated,
+    objectUrlRevoked: false,
+    objectUrlRevokeScheduled,
+    anchorDownloadUsed,
+  };
 }
